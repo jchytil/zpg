@@ -102,3 +102,8 @@ void Camera::SetAspectRatio(float aspectRatio)
 	projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 	Notify();
 }
+
+glm::vec3 Camera::GetPosition()
+{
+	return eye;
+}

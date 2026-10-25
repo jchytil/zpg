@@ -69,5 +69,6 @@ void ShaderProgram::Update()
     glUseProgram(id);
     SetUniform("viewMatrix", camera->GetViewMatrix());
     SetUniform("projectionMatrix", camera->GetProjectionMatrix());
+    SetUniform("cameraPosition", camera->GetPosition().x, camera->GetPosition().y, camera->GetPosition().z);
     glUseProgram(0);
 }

@@ -17,6 +17,7 @@
 #include "models/sun.h"
 #include "models/earth.h"
 #include "models/moon.h"
+#include "models/rocket.h"
 
 #include "Shader.h"
 #include "ShaderProgram.h"
@@ -48,6 +49,15 @@ private:
 	ShaderProgram* bushShaderProgram = nullptr;
 	ShaderProgram* plainShaderProgram = nullptr;
 
+	ShaderProgram* constantShaderProgram;
+	ShaderProgram* lambertShaderProgram;
+	ShaderProgram* phongShaderProgram;
+	ShaderProgram* blinnShaderProgram;
+
+	ShaderProgram* constantColorShaderProgram;
+	ShaderProgram* phongColorShaderProgram;
+	ShaderProgram* blinnColorShaderProgram;
+
 	std::vector<Model*> models;
 	std::vector<Transformation*> transformations;
 	std::vector<DrawableObject*> objects;
@@ -62,6 +72,7 @@ private:
 	Model* modelEarth = nullptr;
 	Model* modelMoon = nullptr;
 	Model* modelPlain = nullptr;
+	Model* modelRocket = nullptr;
 
 	Transformation* moveTransformation = nullptr;
 	Transformation* loginTransformation = nullptr;
@@ -92,6 +103,7 @@ private:
 	void CreateForestScene(DrawableObject* signature);
 	void CreateLoginScene(DrawableObject* signature);
 	void CreateSolarSystemScene(DrawableObject* signature);
+	void CreateLightScene(DrawableObject* signature);
 	void ResizeWindow(int width, int height);
 	void UpdateClock();
 	static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);

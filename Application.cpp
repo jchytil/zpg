@@ -126,6 +126,27 @@ void Application::CreateShaders()
 	GLuint plainFragShader = shader.Create(GL_FRAGMENT_SHADER, "shaders/plain.frag");
 	plainShaderProgram = new ShaderProgram(vertexShader, plainFragShader);
 
+	GLuint lightVertShader = shader.Create(GL_VERTEX_SHADER, "shaders/light.vert");
+
+	GLuint constantFragShader = shader.Create(GL_FRAGMENT_SHADER, "shaders/constant.frag");
+	constantShaderProgram = new ShaderProgram(lightVertShader, constantFragShader);
+
+	GLuint lambertFragShader = shader.Create(GL_FRAGMENT_SHADER, "shaders/lambert.frag");
+	lambertShaderProgram = new ShaderProgram(lightVertShader, lambertFragShader);
+
+	GLuint phongFragShader = shader.Create(GL_FRAGMENT_SHADER, "shaders/phong.frag");
+	phongShaderProgram = new ShaderProgram(lightVertShader, phongFragShader);
+
+	GLuint blinnFragShader = shader.Create(GL_FRAGMENT_SHADER, "shaders/blinn.frag");
+	blinnShaderProgram = new ShaderProgram(lightVertShader, blinnFragShader);
+
+	constantColorShaderProgram = new ShaderProgram(colorVertShader, constantFragShader);
+
+	phongColorShaderProgram = new ShaderProgram(colorVertShader, phongFragShader);
+
+	blinnColorShaderProgram = new ShaderProgram(colorVertShader, blinnFragShader);
+
+
 	camera = new Camera(glm::vec3(0.0f, 0.0f, 2.0f), 800.0f / 600.0f);
 	shaderProgram->SetCamera(camera);
 	sunShaderProgram->SetCamera(camera);
@@ -134,6 +155,13 @@ void Application::CreateShaders()
 	treeShaderProgram->SetCamera(camera);
 	bushShaderProgram->SetCamera(camera);
 	plainShaderProgram->SetCamera(camera);
+	constantShaderProgram->SetCamera(camera);
+	lambertShaderProgram->SetCamera(camera);
+	phongShaderProgram->SetCamera(camera);
+	blinnShaderProgram->SetCamera(camera);
+	constantColorShaderProgram->SetCamera(camera);
+	phongColorShaderProgram->SetCamera(camera);
+	blinnColorShaderProgram->SetCamera(camera);
 
 }
 
@@ -149,6 +177,7 @@ void Application::CreateModels()
 	modelMoon = AddModel(moon, sizeof(moon), { 3, 3, 3 });
 	modelClock = AddModel(clockModel, sizeof(clockModel), { 3, 3, 3 });
 	modelPlain = AddModel(plain, sizeof(plain));
+	modelRocket = AddModel(rocket, sizeof(rocket), { 3, 3, 3 });
 }
 
 void Application::CreateScenes() 
@@ -178,6 +207,7 @@ void Application::CreateScenes()
 	CreateForestScene(signature);
 	CreateLoginScene(signature);
 	CreateSolarSystemScene(signature);
+	CreateLightScene(signature);
 }
 
 void Application::CreateTriangleScene(DrawableObject* signature) 
@@ -287,7 +317,7 @@ void Application::CreateSolarSystemScene(DrawableObject* signature)
 	TransformComposite* sunComposite = new TransformComposite();
 	sunComposite->Add(new DynamicRotate(0.5f, glm::vec3(0.0f, 0.0f, 1.0f)));
 	sunComposite->Add(new Scale(glm::vec3(0.2f)));
-	scene->AddObject(AddObject(modelSun, sunComposite, colorShaderProgram));
+	scene->AddObject(AddObject(modelSun, sunComposite, constantColorShaderProgram));
 
 	TransformComposite* earthOrbit = new TransformComposite();
 	earthOrbit->Add(new DynamicRotate(0.5f, glm::vec3(0.0f, 0.0f, 1.0f)));
@@ -296,16 +326,50 @@ void Application::CreateSolarSystemScene(DrawableObject* signature)
 	TransformComposite* earthComposite = new TransformComposite();
 	earthComposite->Add(earthOrbit);
 	earthComposite->Add(new Scale(glm::vec3(0.08f)));
-	scene->AddObject(AddObject(modelEarth, earthComposite, colorShaderProgram));
+	scene->AddObject(AddObject(modelEarth, earthComposite, phongColorShaderProgram));
 
 	TransformComposite* moonComposite = new TransformComposite();
 	moonComposite->Add(earthOrbit);
 	moonComposite->Add(new DynamicRotate(2.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
 	moonComposite->Add(new Translate(glm::vec3(0.15f, 0.0f, 0.0f)));
 	moonComposite->Add(new Scale(glm::vec3(0.03f)));
-	scene->AddObject(AddObject(modelMoon, moonComposite, colorShaderProgram));
+	scene->AddObject(AddObject(modelMoon, moonComposite, blinnColorShaderProgram));
+
+	TransformComposite* rocketComposite = new TransformComposite();
+	rocketComposite->Add(new DynamicRotate(0.3f, glm::vec3(0.0f, 0.0f, 1.0f)));
+	rocketComposite->Add(new Translate(glm::vec3(0.9f, 0.0f, 0.0f)));
+	rocketComposite->Add(new Scale(glm::vec3(0.15f)));
+	scene->AddObject(AddObject(modelRocket, rocketComposite, phongColorShaderProgram));
 
 	scene->AddObject(signature);
+}
+
+void Application::CreateLightScene(DrawableObject* signature)
+{
+	Scene* scene = AddScene();
+
+	TransformComposite* transComp1 = new TransformComposite();
+	transComp1->Add(new Translate(glm::vec3(0.0f, 0.65f, 0.0f)));
+	transComp1->Add(new Scale(glm::vec3(0.25f)));
+	scene->AddObject(AddObject(modelSphere, transComp1, constantShaderProgram));
+
+	TransformComposite* transComp2 = new TransformComposite();
+	transComp2->Add(new Translate(glm::vec3(0.65f, 0.0f, 0.0f)));
+	transComp2->Add(new Scale(glm::vec3(0.25f)));
+	scene->AddObject(AddObject(modelSphere, transComp2, lambertShaderProgram));
+
+	TransformComposite* transComp3= new TransformComposite();
+	transComp3->Add(new Translate(glm::vec3(0.0f, -0.65f, 0.0f)));
+	transComp3->Add(new Scale(glm::vec3(0.25f)));
+	scene->AddObject(AddObject(modelSphere, transComp3, phongShaderProgram));
+
+	TransformComposite* transComp4 = new TransformComposite();
+	transComp4->Add(new Translate(glm::vec3(-0.65f, 0.0f, 0.0f)));
+	transComp4->Add(new Scale(glm::vec3(0.25f)));
+	scene->AddObject(AddObject(modelSphere, transComp4, blinnShaderProgram));
+
+	scene->AddObject(signature);
+
 }
 
 void Application::ProcessInput() 
@@ -333,6 +397,11 @@ void Application::ProcessInput()
 	if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS && scenes.size() > 4)
 	{
 		currentSceneIndex = 4;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS && scenes.size() > 5)
+	{
+		currentSceneIndex = 5;
 	}
 
 }
